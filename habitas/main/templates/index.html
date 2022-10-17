@@ -17,7 +17,22 @@
 
     var map = L.map('map').setView([-23.205459913570404, -45.88184219354045], 15);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    var circle = L.circle([-23.200161012154815, -45.88547685457403], {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.5,
+        radius: 5
+    }).addTo(map);
+
+
+    function onMapClick(e) {
+    alert("You clicked the map at " + e.latlng);
+}
+
+    circle.on('click', onMapClick);    
+
 </script>
