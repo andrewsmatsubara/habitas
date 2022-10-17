@@ -5,7 +5,7 @@ from django.db import models
 class Tree(models.Model):
     nome_popular = models.CharField(max_length=255)
     nome_cientifico = models.CharField(max_length=255)
-    DAP = models.IntegerField()
+    dap = models.IntegerField()
     altura = models.IntegerField()
     data_da_coleta = models.DateField()
     latitude = models.FloatField()

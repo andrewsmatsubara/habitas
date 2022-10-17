@@ -10,7 +10,7 @@
 
 <div id="map"></div>
 
-<div id="text"></div>
+<div><p id="text"></p></div>
 
 
 <script>
@@ -31,7 +31,7 @@
     // }).addTo(map);
 
 
-    function onMapClick(tree_dict) {
+    function onMapClick(index) {
     // console.log("Nome popular: " + tree_dict.nome_popular);
     // console.log("Nome científico: " + tree_dict.nome_cientifico);
     // console.log("DAP: " + tree_dict.dap);
@@ -40,8 +40,10 @@
     // console.log("Latitude: " + tree_dict.latitude);
     // console.log("Longitude: " + tree_dict.longitude);
 
-    // write tree data on div with id = "text"
+    tree_dict = tree_array[index]
+
     document.getElementById("text").innerHTML = "Nome popular: " + tree_dict.nome_popular + "<br>" + "Nome científico: " + tree_dict.nome_cientifico + "<br>" + "DAP: " + tree_dict.dap + "<br>" + "Altura: " + tree_dict.altura + "<br>" + "Data da coleta: " + tree_dict.data_da_coleta + "<br>" + "Latitude: " + tree_dict.latitude + "<br>" + "Longitude: " + tree_dict.longitude;
+        
 
 }
    
@@ -51,9 +53,12 @@
 {% block content %}
 
 <script>
+    tree_array = []
+    circlearray = [];
+
     {% for tree in trees %}
 
-    var tree_dict = {
+    tree_obj = {
         nome_popular: "{{ tree.nome_popular }}",
         nome_cientifico: "{{ tree.nome_cientifico }}",
         dap: "{{ tree.dap }}",
@@ -62,19 +67,25 @@
         latitude: "{{ tree.latitude }}",
         longitude: "{{ tree.longitude }}"
     };
+
+    tree_array.push(tree_obj);
     
-    var circle = L.circle([{{tree.latitude}}, {{tree.longitude}}], {
+    circle = L.circle([{{tree.latitude}}, {{tree.longitude}}], {
             color: 'red',
             fillColor: '#f03',
             fillOpacity: 0.5,
             radius: 5
         }).addTo(map);
-
-        circle.on('click', function(e){
-            onMapClick(tree_dict)
-        });
+        circlearray.push(circle);
     
     {% endfor %}
+
+    circlearray.forEach(function(circle, index) {
+        circle.on('click', function() {
+            onMapClick(index);
+        });
+    });
+    
 
     
     </script>
