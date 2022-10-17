@@ -8,12 +8,14 @@
 <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
 
 
-
-
 <div id="map"></div>
+
+<div id="text"></div>
 
 
 <script>
+
+    // load trees from context to list
 
     var map = L.map('map').setView([-23.205459913570404, -45.88184219354045], 15);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -21,18 +23,60 @@
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
-    var circle = L.circle([-23.200161012154815, -45.88547685457403], {
-        color: 'red',
-        fillColor: '#f03',
-        fillOpacity: 0.5,
-        radius: 5
-    }).addTo(map);
+    // var circle = L.circle([-23.200161012154815, -45.88547685457403], {
+    //     color: 'red',
+    //     fillColor: '#f03',
+    //     fillOpacity: 0.5,
+    //     radius: 5
+    // }).addTo(map);
 
 
-    function onMapClick(e) {
-    alert("You clicked the map at " + e.latlng);
+    function onMapClick(tree_dict) {
+    // console.log("Nome popular: " + tree_dict.nome_popular);
+    // console.log("Nome científico: " + tree_dict.nome_cientifico);
+    // console.log("DAP: " + tree_dict.dap);
+    // console.log("Altura: " + tree_dict.altura);
+    // console.log("Data da coleta: " + tree_dict.data_da_coleta);
+    // console.log("Latitude: " + tree_dict.latitude);
+    // console.log("Longitude: " + tree_dict.longitude);
+
+    // write tree data on div with id = "text"
+    document.getElementById("text").innerHTML = "Nome popular: " + tree_dict.nome_popular + "<br>" + "Nome científico: " + tree_dict.nome_cientifico + "<br>" + "DAP: " + tree_dict.dap + "<br>" + "Altura: " + tree_dict.altura + "<br>" + "Data da coleta: " + tree_dict.data_da_coleta + "<br>" + "Latitude: " + tree_dict.latitude + "<br>" + "Longitude: " + tree_dict.longitude;
+
 }
-
-    circle.on('click', onMapClick);    
+   
 
 </script>
+
+{% block content %}
+
+<script>
+    {% for tree in trees %}
+
+    var tree_dict = {
+        nome_popular: "{{ tree.nome_popular }}",
+        nome_cientifico: "{{ tree.nome_cientifico }}",
+        dap: "{{ tree.dap }}",
+        altura: "{{ tree.altura }}",
+        data_da_coleta: "{{ tree.data_da_coleta }}",
+        latitude: "{{ tree.latitude }}",
+        longitude: "{{ tree.longitude }}"
+    };
+    
+    var circle = L.circle([{{tree.latitude}}, {{tree.longitude}}], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.5,
+            radius: 5
+        }).addTo(map);
+
+        circle.on('click', function(e){
+            onMapClick(tree_dict)
+        });
+    
+    {% endfor %}
+
+    
+    </script>
+
+{% endblock content %}
