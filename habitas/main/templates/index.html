@@ -9,6 +9,10 @@
     integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
 <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
     integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
+<script type="text/javascript" src="{% static 'js/city.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bairros.js' %}"></script>
+
+
 
 {% endblock %}
 
@@ -37,8 +41,10 @@
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
+    L.geoJSON(CITY_LIMIT).addTo(map);
+    L.geoJSON(BAIRROS).addTo(map);
 
-
+    console.log(CITY_LIMIT)
     function onMapClick(index) {
 
         tree_dict = tree_array[index]
