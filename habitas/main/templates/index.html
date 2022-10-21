@@ -1,16 +1,29 @@
+{% extends '_base.html' %}
 {% load static %}
 
+
+{% block header %}
+
 <link rel="stylesheet" href="{% static 'index.css' %}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
+    integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
+    integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css" integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin=""/>
+{% endblock %}
 
-<!-- Make sure you put this AFTER Leaflet's CSS -->
-<script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js" integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
+{% block title %} Habitas {% endblock %}
+
+{% block content %}
 
 
-<div id="map"></div>
+<div class="z-0 flex w-full place-content-center">
+    <div id="map" class="z-0 w-4/5 self-center" style="height: 500px"></div>
+</div>
 
-<div><p id="text"></p></div>
+<div>
+    <p id="text"></p>
+</div>
 
 
 <script>
@@ -18,39 +31,24 @@
     // load trees from context to list
 
     var map = L.map('map').setView([-23.205459913570404, -45.88184219354045], 15);
+
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
-    // var circle = L.circle([-23.200161012154815, -45.88547685457403], {
-    //     color: 'red',
-    //     fillColor: '#f03',
-    //     fillOpacity: 0.5,
-    //     radius: 5
-    // }).addTo(map);
 
 
     function onMapClick(index) {
-    // console.log("Nome popular: " + tree_dict.nome_popular);
-    // console.log("Nome científico: " + tree_dict.nome_cientifico);
-    // console.log("DAP: " + tree_dict.dap);
-    // console.log("Altura: " + tree_dict.altura);
-    // console.log("Data da coleta: " + tree_dict.data_da_coleta);
-    // console.log("Latitude: " + tree_dict.latitude);
-    // console.log("Longitude: " + tree_dict.longitude);
 
-    tree_dict = tree_array[index]
+        tree_dict = tree_array[index]
+        document.getElementById("text").innerHTML = "Nome popular: " + tree_dict.nome_popular + "<br>" + "Nome científico: " + tree_dict.nome_cientifico + "<br>" + "DAP: " + tree_dict.dap + "<br>" + "Altura: " + tree_dict.altura + "<br>" + "Data da coleta: " + tree_dict.data_da_coleta + "<br>" + "Latitude: " + tree_dict.latitude + "<br>" + "Longitude: " + tree_dict.longitude;
 
-    document.getElementById("text").innerHTML = "Nome popular: " + tree_dict.nome_popular + "<br>" + "Nome científico: " + tree_dict.nome_cientifico + "<br>" + "DAP: " + tree_dict.dap + "<br>" + "Altura: " + tree_dict.altura + "<br>" + "Data da coleta: " + tree_dict.data_da_coleta + "<br>" + "Latitude: " + tree_dict.latitude + "<br>" + "Longitude: " + tree_dict.longitude;
-        
 
-}
-   
+    }
+
 
 </script>
-
-{% block content %}
 
 <script>
     tree_array = []
@@ -69,25 +67,28 @@
     };
 
     tree_array.push(tree_obj);
-    
-    circle = L.circle([{{tree.latitude}}, {{tree.longitude}}], {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.5,
-            radius: 5
-        }).addTo(map);
-        circlearray.push(circle);
-    
+
+    circle = L.circle([{{ tree.latitude }}, {{ tree.longitude }}], {
+        color: 'green',
+        fillColor: '#040',
+        fillOpacity: 0.5,
+        radius: 5
+    }).addTo(map);
+    circlearray.push(circle);
+
     {% endfor %}
 
-    circlearray.forEach(function(circle, index) {
-        circle.on('click', function() {
-            onMapClick(index);
-        });
+    circlearray.forEach(function (circle, index) {
+        tree_dict = tree_array[index]
+        popup = `<span class="font-bold text-ellipsis">Nome popular:</span> ${tree_dict.nome_popular}<br>` +
+            `<span class="font-bold text-ellipsis">Nome científico:</span> ${tree_dict.nome_cientifico}<br>` +
+            `<span class="font-bold text-ellipsis">Diâmetro:</span> ${tree_dict.dap}cm<br>`
+        "DAP: " + tree_dict.dap + "<br>" + "Altura: " + tree_dict.altura + "<br>" + "Data da coleta: " + tree_dict.data_da_coleta + "<br>" + "Latitude: " + tree_dict.latitude + "<br>" + "Longitude: " + tree_dict.longitude;
+        circle.bindPopup(popup)
     });
-    
 
-    
-    </script>
 
-{% endblock content %}
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- <link rel="stylesheet" href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" /> -->
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+
+    {% block header %}{% endblock %}
+
+    <title>{% block title %}{% endblock %}</title>
+
+</head>
+
+<body>
+
+    <nav
+        class="sticky z-50 flex-none w-full top-0 z-40 backdrop-blur flex-none transition-colors duration-500  bg-white/95">
+        <div class="py-4 px-12">
+
+            <h1 class="text-emerald-600  font-serif  text-5xl"><a href="{% url 'index'%}">Habitas</a></h1>
+        </div>
+    </nav>
+    {% block content %} {% endblock %}
+
+</body>
+
+</html>
