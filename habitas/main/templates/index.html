@@ -40,6 +40,15 @@
     <p class="text-left font-light">
       596 Árvores registradas.
     </p>
+    <h1 class="text-2xl text-left font-medium my-4 w-fit">
+      Estatísticas da árvore selecionada
+      <hr class="bg-emerald-900 h-1.5 w-full" />
+    </h1>
+    <h1 class="text-2xl text-left font-medium my-4 w-fit" id="nome_popular">
+      <hr class="bg-emerald-900 h-1.5 w-full"/>
+    </h1>
+    <p class="text-left font-light" id="dados">
+    </p>
   </div>
   <div class="z-0 col-span-3 pr-2 h-screen">
     <div id="map" class="z-0 min-w-max"></div>
@@ -72,9 +81,9 @@
   </div>
 </div>
 
-<div>
+<!-- <div>
   <p id="text"></p>
-</div>
+</div> -->
 
 <script>
   // load trees from context to list
@@ -93,27 +102,30 @@
   console.log(CITY_LIMIT);
   function onMapClick(index) {
     tree_dict = tree_array[index];
-    document.getElementById("text").innerHTML =
-      "Nome popular: " +
-      tree_dict.nome_popular +
-      "<br>" +
+    document.getElementById("dados").innerHTML =
       "Nome científico: " +
       tree_dict.nome_cientifico +
       "<br>" +
       "DAP: " +
-      tree_dict.dap +
+      tree_dict.dap + " cm" +
       "<br>" +
       "Altura: " +
-      tree_dict.altura +
+      tree_dict.altura + " m" +
       "<br>" +
-      "Data da coleta: " +
-      tree_dict.data_da_coleta +
-      "<br>" +
+      // "Data da coleta: " +
+      // tree_dict.data_da_coleta +
+      // "<br>" +
       "Latitude: " +
       tree_dict.latitude +
       "<br>" +
       "Longitude: " +
       tree_dict.longitude;
+    document.getElementById("nome_popular").innerHTML =
+      "Nome popular: " + tree_dict.nome_popular;
+    // document.getElementById("nome_cientifico").innerHTML =
+    //   "Nome científico: " + tree_dict.nome_cientifico;
+    // document.getElementById("diametro").innerHTML =
+    //   "Diâmetro: " + tree_dict.dap;
   }
 </script>
 
@@ -139,19 +151,29 @@
       color: 'green',
       fillColor: '#040',
       fillOpacity: 0.5,
-      radius: 5
+      radius: 5,
+      selected: false,
   }).addTo(map);
   circlearray.push(circle);
+  lastclickedcircle = circle;
 
   {% endfor %}
 
+  // circlearray.forEach(function (circle, index) {
+  //     tree_dict = tree_array[index]
+  //     popup = `<span class="font-bold text-ellipsis">Nome popular:</span> ${tree_dict.nome_popular}<br>` +
+  //         `<span class="font-bold text-ellipsis">Nome científico:</span> ${tree_dict.nome_cientifico}<br>` +
+  //         `<span class="font-bold text-ellipsis">Diâmetro:</span> ${tree_dict.dap}cm<br>`
+  //     "DAP: " + tree_dict.dap + "<br>" + "Altura: " + tree_dict.altura + "<br>" + "Data da coleta: " + tree_dict.data_da_coleta + "<br>" + "Latitude: " + tree_dict.latitude + "<br>" + "Longitude: " + tree_dict.longitude;
+  //     circle.bindPopup(popup)
+  // });
   circlearray.forEach(function (circle, index) {
-      tree_dict = tree_array[index]
-      popup = `<span class="font-bold text-ellipsis">Nome popular:</span> ${tree_dict.nome_popular}<br>` +
-          `<span class="font-bold text-ellipsis">Nome científico:</span> ${tree_dict.nome_cientifico}<br>` +
-          `<span class="font-bold text-ellipsis">Diâmetro:</span> ${tree_dict.dap}cm<br>`
-      "DAP: " + tree_dict.dap + "<br>" + "Altura: " + tree_dict.altura + "<br>" + "Data da coleta: " + tree_dict.data_da_coleta + "<br>" + "Latitude: " + tree_dict.latitude + "<br>" + "Longitude: " + tree_dict.longitude;
-      circle.bindPopup(popup)
+    circle.on("click", function () {
+      lastclickedcircle.setStyle({color: 'green', fillColor: '#040'});
+      onMapClick(index);
+      this.setStyle({color: 'red', fillColor: '#f00'});
+      lastclickedcircle = this;
+    });
   });
 </script>
 
