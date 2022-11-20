@@ -1,34 +1,28 @@
 <div>
-<div class="space-y-8">
-    {% for post in posts %}
-    <div class="mx-4 sm:mx-6 md:mx-24 lg:mx-40 space-y-2 relative">
-        <div class="flex gap-2 items-center">
-            <h2 class="font-bold">{{ post.author }} &nbsp</h2>
-            <!-- <small class="inline-flex gap-1 items-center text-gray-600 font-semibold"> -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-900" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
-              </svg>
-                <span>&nbsp {{ post.created_on|date:"d M. Y, H:m"}}</span>
-            <!-- </small> -->
-        </div>
-        <p class="shadow p-2 bg-gray-900 rounded text-gray-100 mb-2 ml-2">&ensp {{ post.content }}</p>
+  <div>
+    <div class="flex flex-col place-items-center">
+      <h3 class="text-xl font-medium text-center">Publique um comentário sobre esta árvore!</h3>
+      <textarea unicorn:model.lazy="author" placeholder="Autor" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 h-15 my-2"></textarea>
+      <textarea unicorn:model.lazy="content" placeholder="Comentário" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 h-20 my-2"></textarea>
+      <button unicorn:click="submit" class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-full">Enviar</button>        
+    </div>
+  </div>
+  <div class="my-8">
+    <div class="flex flex-col gap-2">
+
+      {% for post in posts %}
+      <div class="flex justify-between w-full ">
+        <h2 class="font-bold text-left">{{ post.author }}</h2>
+        <span>{{ post.created_on|date:"d M. Y, H:m"}}</span>
       </div>
 
-    {% empty %}
-    <h2 class="font-bold">Nenhum comentário</h2>
-    {% endfor %}
+      <p class="shadow p-2 bg-gray-200 rounded text-gray-900 mb-2">{{ post.content }}</p>
 
-</div>
 
-<div>
-  
-  <textarea unicorn:model.lazy="author" placeholder="Autor">
-  </textarea>
-  <textarea unicorn:model.lazy="content" placeholder="Comentário">
-  </textarea>
+      {% empty %}
+      <h2 class="font-bold text-center">Nenhum comentário</h2>
+      {% endfor %}
+    </div>
+  </div>
 
-  <button unicorn:click="submit" title="Enviar novo comentário">Enviar novo comentário
-  </button>        
-
-</div>
 </div>

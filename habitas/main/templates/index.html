@@ -37,18 +37,29 @@
       Estatísticas gerais
       <hr class="bg-emerald-900 h-1.5 w-full" />
     </h1>
-    <p class="text-left font-light">
-      596 Árvores registradas.
-    </p>
+
+
+    <div class="grid grid-cols-3">
+      {% for stat_name, stat in stats.items %}
+        <div class="my-2">
+          <span class="font-bold text-xl">{{stat}}</span>
+          <br>
+          <span class="text-lg">{{stat_name | safe}}</span> 
+        </div>
+      {% endfor %}
+    </div>
+
+
     <div id="estatisticas" style="visibility:hidden;">
+
     <h1 class="text-2xl text-left font-medium my-4 w-fit">
-      Estatísticas da árvore selecionada
+      Informações sobre a árvore
       <hr class="bg-emerald-900 h-1.5 w-full" />
     </h1>
     <h1 class="text-2xl text-left font-medium my-4 w-fit" id="nome_popular">
       <hr class="bg-emerald-900 h-1.5 w-full"/>
     </h1>
-    <p class="text-left font-light" id="dados">
+    <p class="text-left " id="dados">
     </p>
       <h2 class="text-2xl text-left font-medium my-4 w-fit">
         Comentários
@@ -83,10 +94,19 @@
           <line x1="16" y1="21" x2="16" y2="14" />
         </svg>
         <span class="text-xl">Habitas</span><sup class="text-sm">®</sup>
+        <span class="underline"></span>
       </span>
     </div>
   </div>
 </div>
+
+<script>
+
+function create_google_maps_url(lat, long){
+  return `http://maps.google.com/maps?z=12&t=m&q=loc:${lat}+${long}`
+}
+
+</script>
 
 <script>
   // load trees from context to list
@@ -102,35 +122,25 @@
   L.geoJSON(CITY_LIMIT).addTo(map);
   L.geoJSON(BAIRROS).addTo(map);
 
-  console.log(CITY_LIMIT);
   function onMapClick(index) {
-    tree_dict = tree_array[index];
-    Unicorn.call("posts", "update", index);
-    document.getElementById("estatisticas").style.visibility = "visible";
-    document.getElementById("dados").innerHTML =
-      "Número da árvore: " + 
-      tree_dict.numero +
-      "<br>" +
-      "Nome científico: " +
-      tree_dict.nome_cientifico +
-      "<br>" +
-      "Diâmetro à altura do peito: " +
-      tree_dict.dap + " cm" +
-      "<br>" +
-      "Altura: " +
-      tree_dict.altura + " m" +
-      "<br>" +
-      // "Data da coleta: " +
-      // tree_dict.data_da_coleta +
-      // "<br>" +
-      "Latitude: " +
-      tree_dict.latitude +
-      "<br>" +
-      "Longitude: " +
-      tree_dict.longitude;
+    tree = tree_map.get(index)
+    Unicorn.call("posts", "update", tree.id);
 
-    document.getElementById("nome_popular").innerHTML =
-      "Nome popular: " + tree_dict.nome_popular;
+
+
+    google_maps_url = create_google_maps_url(tree.latitude, tree.longitude)
+
+    document.getElementById("estatisticas").style.visibility = "visible";
+    document.getElementById("dados").innerHTML = `
+      <p>Id. da árvore: ${tree.numero}</p>
+      <p>Nome científico: ${tree.nome_cientifico}</p>
+      <p>Diâmetro: ${tree.dap} cm</p>
+      <p>Altura: ${tree.altura} m</p>
+      <p>Google maps: <a href="${google_maps_url}" class="underline text-blue-500">link</a></p>
+      <p>CO<sub>2</sub> retido: ${ Math.round(1000 * tree.co2) } kg</p>
+    `
+
+    document.getElementById("nome_popular").innerHTML = `${tree.nome_popular}`;
 
     // use tree_dict.id to load posts using django_unicorn
 
@@ -139,36 +149,62 @@
 </script>
 
 <script>
-  tree_array = [];
-  circlearray = [];
+  tree_map = new Map();
 
   {% for tree in trees %}
+    tree_obj = {
+        id: {{ tree.id }},
+        nome_popular: "{{ tree.nome_popular }}",
+        nome_cientifico: "{{ tree.nome_cientifico }}",
+        dap: "{{ tree.dap }}",
+        altura: "{{ tree.altura }}",
+        data_da_coleta: "{{ tree.data_da_coleta }}",
+        latitude: "{{ tree.latitude }}",
+        longitude: "{{ tree.longitude }}",
+        numero: {{ tree.N_placa }},
+        n_comentarios: {{ tree.n_posts }},
+        co2: {{ tree.stored_co2 }},
+        color: "green",
+    };
+    
+    if (tree_obj.n_comentarios > 0)
+      tree_obj.color = "yellow";
 
-  tree_obj = {
-      id: {{ tree.id }},
-      nome_popular: "{{ tree.nome_popular }}",
-      nome_cientifico: "{{ tree.nome_cientifico }}",
-      dap: "{{ tree.dap }}",
-      altura: "{{ tree.altura }}",
-      data_da_coleta: "{{ tree.data_da_coleta }}",
-      latitude: "{{ tree.latitude }}",
-      longitude: "{{ tree.longitude }}",
-      numero: {{ tree.N_placa }},
-  };
-
-  tree_array.push(tree_obj);
-
-  circle = L.circle([{{ tree.latitude }}, {{ tree.longitude }}], {
-      color: 'green',
-      fillColor: '#040',
-      fillOpacity: 0.5,
-      radius: 5,
-      selected: false,
-  }).addTo(map);
-  circlearray.push(circle);
-  lastclickedcircle = circle;
-
+    tree_map.set(tree_obj.id, tree_obj) 
   {% endfor %}
+
+
+  // circle_map = new Map();
+  lastClickedCircle = undefined;
+
+  for (let [tree_id, tree] of tree_map) {
+    circle = L.circle(
+        [tree.latitude, tree.longitude], 
+        {
+          color: tree.color,
+          fillColor: tree.color,
+          fillOpacity: 0.5,
+          radius: 5,
+          selected: false,
+        }
+    ).addTo(map);
+    circle.tree_id = tree_id;
+
+    circle.on("click", function(){
+      if (lastClickedCircle){
+        lastClickedCircle.setStyle({
+          color: tree_map.get(lastClickedCircle.tree_id).color, 
+          fillColor: tree_map.get(lastClickedCircle.tree_id).color
+        });
+      }
+
+      onMapClick(tree_id);
+      lastClickedCircle = this;
+      this.setStyle({color: 'red', fillColor: '#f00'});
+    })
+
+  }
+
 
   // circlearray.forEach(function (circle, index) {
   //     tree_dict = tree_array[index]
@@ -178,14 +214,14 @@
   //     "DAP: " + tree_dict.dap + "<br>" + "Altura: " + tree_dict.altura + "<br>" + "Data da coleta: " + tree_dict.data_da_coleta + "<br>" + "Latitude: " + tree_dict.latitude + "<br>" + "Longitude: " + tree_dict.longitude;
   //     circle.bindPopup(popup)
   // });
-  circlearray.forEach(function (circle, index) {
-    circle.on("click", function () {
-      lastclickedcircle.setStyle({color: 'green', fillColor: '#040'});
-      onMapClick(index);
-      this.setStyle({color: 'red', fillColor: '#f00'});
-      lastclickedcircle = this;
-    });
-  });
+  // circlearray.forEach(function (circle, index) {
+  //   circle.on("click", function () {
+  //     lastClickedCircle.setStyle({color: 'green', fillColor: '#040'});
+  //     onMapClick(index);
+  //     this.setStyle({color: 'red', fillColor: '#f00'});
+  //     lastClickedCircle = this;
+  //   });
+  // });
 </script>
 
 {% endblock %}
