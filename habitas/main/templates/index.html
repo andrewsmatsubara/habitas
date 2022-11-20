@@ -108,10 +108,13 @@
     Unicorn.call("posts", "update", index);
     document.getElementById("estatisticas").style.visibility = "visible";
     document.getElementById("dados").innerHTML =
+      "Número da árvore: " + 
+      tree_dict.numero +
+      "<br>" +
       "Nome científico: " +
       tree_dict.nome_cientifico +
       "<br>" +
-      "DAP: " +
+      "Diâmetro à altura do peito: " +
       tree_dict.dap + " cm" +
       "<br>" +
       "Altura: " +
@@ -149,7 +152,8 @@
       altura: "{{ tree.altura }}",
       data_da_coleta: "{{ tree.data_da_coleta }}",
       latitude: "{{ tree.latitude }}",
-      longitude: "{{ tree.longitude }}"
+      longitude: "{{ tree.longitude }}",
+      numero: {{ tree.N_placa }},
   };
 
   tree_array.push(tree_obj);
