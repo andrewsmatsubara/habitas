@@ -1,9 +1,8 @@
 from django.shortcuts import render
-from .models import Tree
+from django.http import JsonResponse
+from .models import Tree, Post
 
 # Create your views here.
-
-# from .models import Question
 
 
 def index(request):

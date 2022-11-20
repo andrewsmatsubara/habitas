@@ -1,4 +1,4 @@
-{% extends '_base.html' %} {% load static %} {% block header %}
+{% extends '_base.html' %} {% load unicorn %}{% load static %} {% block header %}
 
 <link rel="stylesheet" href="{% static 'index.css' %}" />
 
@@ -18,10 +18,10 @@
 
 {% endblock %} {% block title %} Habitas {% endblock %} {% block content %}
 
-<div class="grid grid-cols-4 my-4">
+<div class="grid grid-cols-4 my-4 scrollbar-thin scrollbar scrollbar-thumb-gray-300" style="overflow-y: auto;max-height: 100vh;">
   <div
     class="col-span-1 mx-2 px-6 items-center scrollbar-thin scrollbar scrollbar-thumb-gray-300 scrollbar-track-gray-100 bg-clip-content border h-[calc(93vh-90px)]"
-  >
+    style="overflow-y: auto;max-height: 100vh;">
     <h1 class="text-3xl text-left font-bold my-2 w-fit">
       Árvores de SJC
       <hr class="bg-emerald-600 h-2.5 w-full my-2" />
@@ -40,6 +40,7 @@
     <p class="text-left font-light">
       596 Árvores registradas.
     </p>
+    <div id="estatisticas" style="visibility:hidden;">
     <h1 class="text-2xl text-left font-medium my-4 w-fit">
       Estatísticas da árvore selecionada
       <hr class="bg-emerald-900 h-1.5 w-full" />
@@ -49,6 +50,12 @@
     </h1>
     <p class="text-left font-light" id="dados">
     </p>
+      <h2 class="text-2xl text-left font-medium my-4 w-fit">
+        Comentários
+        <hr class="bg-emerald-900 h-1.5 w-full" />
+      </h2>
+      {% unicorn 'posts' %}
+    </div>
   </div>
   <div class="z-0 col-span-3 pr-2 h-screen">
     <div id="map" class="z-0 min-w-max"></div>
@@ -81,10 +88,6 @@
   </div>
 </div>
 
-<!-- <div>
-  <p id="text"></p>
-</div> -->
-
 <script>
   // load trees from context to list
 
@@ -102,6 +105,8 @@
   console.log(CITY_LIMIT);
   function onMapClick(index) {
     tree_dict = tree_array[index];
+    Unicorn.call("posts", "update", index);
+    document.getElementById("estatisticas").style.visibility = "visible";
     document.getElementById("dados").innerHTML =
       "Nome científico: " +
       tree_dict.nome_cientifico +
@@ -120,22 +125,24 @@
       "<br>" +
       "Longitude: " +
       tree_dict.longitude;
+
     document.getElementById("nome_popular").innerHTML =
       "Nome popular: " + tree_dict.nome_popular;
-    // document.getElementById("nome_cientifico").innerHTML =
-    //   "Nome científico: " + tree_dict.nome_cientifico;
-    // document.getElementById("diametro").innerHTML =
-    //   "Diâmetro: " + tree_dict.dap;
+
+    // use tree_dict.id to load posts using django_unicorn
+
+
   }
 </script>
 
 <script>
-  tree_array = []
+  tree_array = [];
   circlearray = [];
 
   {% for tree in trees %}
 
   tree_obj = {
+      id: {{ tree.id }},
       nome_popular: "{{ tree.nome_popular }}",
       nome_cientifico: "{{ tree.nome_cientifico }}",
       dap: "{{ tree.dap }}",

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
-from .models import Tree
+from .models import Tree, Post
 
 
 class TreeResource(resources.ModelResource):
@@ -14,3 +14,4 @@ class MedicamentoDataAdmin(ImportExportModelAdmin):
     resource_class = TreeResource
 
 admin.site.register(Tree, MedicamentoDataAdmin)
+admin.site.register(Post)

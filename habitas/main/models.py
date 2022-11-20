@@ -12,3 +12,13 @@ class Tree(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     laudo = models.URLField(max_length=255, blank=True)
+
+
+class Post(models.Model):
+    tree = models.ForeignKey(Tree,related_name="posts", on_delete=models.CASCADE)
+    author = models.CharField(max_length=255)
+    content = models.TextField()
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_on", )

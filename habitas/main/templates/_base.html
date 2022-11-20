@@ -1,7 +1,9 @@
+{% load unicorn %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    {% unicorn_scripts %}
     <!-- <link rel="stylesheet" href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" /> -->
     {% block header %}{% endblock %}
 
@@ -10,6 +12,7 @@
   </head>
 
   <body class="overflow-y-hidden">
+    {% csrf_token %}
     <nav class="z-50 flex w-full top-0 backdrop-blur bg-white px-2">
       <div class="flex flex-col w-full">
         <div class="px-12 py-4">
