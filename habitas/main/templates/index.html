@@ -138,6 +138,7 @@ function create_google_maps_url(lat, long){
       <p>Altura: ${tree.altura} m</p>
       <p>Google maps: <a href="${google_maps_url}" class="underline text-blue-500">link</a></p>
       <p>CO<sub>2</sub> retido: ${ Math.round(1000 * tree.co2) } kg</p>
+      <p> Plantado por: DCTA </p>
     `
 
     document.getElementById("nome_popular").innerHTML = `${tree.nome_popular}`;
