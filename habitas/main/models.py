@@ -12,11 +12,12 @@ class Tree(models.Model):
     nome_popular = models.CharField(max_length=255)
     nome_cientifico = models.CharField(max_length=255)
     dap = models.IntegerField()
-    altura = models.IntegerField()
+    altura = models.FloatField()
     # data_da_coleta = models.DateField(blank=True)
     latitude = models.FloatField()
     longitude = models.FloatField()
     laudo = models.URLField(max_length=255, blank=True)
+    imagem = models.URLField(max_length=255, blank=True)
 
     @property
     def stored_co2(self) -> float:
