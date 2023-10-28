@@ -49,6 +49,21 @@
       {% endfor %}
     </div>
 
+    <h1 class="text-2xl text-left font-medium my-4 w-fit">
+      Benefícios ecológicos
+      <hr class="bg-emerald-900 h-1.5 w-full" />
+    </h1>
+
+    {% for stat_name, stat in eco_stats.items %}
+      <div class="my-2">
+        <div class="font-bold text-xl">{{stat_name | safe}}</div>
+        <div style="display: grid; grid-auto-flow: column;">
+          <span class="text-lg">{{stat.value}} <span style="color: rgb(5 150 105)">{{stat.value_text}}</span></span>
+            <span class="text-lg"><span style="color: rgb(5 150 105)">Valor: </span>{{stat.money}} R$</span>
+        </div>
+      </div>
+    {% endfor %}
+
 
     <div id="estatisticas" style="visibility:hidden;">
 
@@ -138,7 +153,8 @@ function create_google_maps_url(lat, long){
       <p>Altura: ${tree.altura} m</p>
       <p>Google maps: <a href="${google_maps_url}" class="underline text-blue-500">link</a></p>
       <p>CO<sub>2</sub> retido: ${ Math.round(1000 * tree.co2) } kg</p>
-      <p> Plantado por: DCTA </p>
+      <p>Água de chuva interceptada: ${ Math.round(tree.stormwater) } L</p>
+      <p> Plantado por: ${tree.plantado_por } </p>
     `
 
     document.getElementById("nome_popular").innerHTML = `${tree.nome_popular}`;
@@ -165,7 +181,9 @@ function create_google_maps_url(lat, long){
         numero: {{ tree.N_placa }},
         n_comentarios: {{ tree.n_posts }},
         co2: {{ tree.stored_co2 }},
+        stormwater: {{ tree.stormwater_intercepted }},
         color: "green",
+        plantado_por: "{{ tree.plantado_por }}"
     };
     
     if (tree_obj.n_comentarios > 0)

@@ -6,6 +6,9 @@ BETA0 = -0.906586
 BETA1 = 1.60421
 BETA2 = 0.37162
 
+PRECIPITATION = 1329  # Precipitação anual em São José dos Campos (L / m^2)
+DIAMETER_RATIO = 4  # Razão média entre diâmetro da copa e diâmetro do tronco
+
 
 class Tree(models.Model):
     N_placa = models.FloatField(default=0)
@@ -18,6 +21,7 @@ class Tree(models.Model):
     longitude = models.FloatField()
     laudo = models.URLField(max_length=255, blank=True)
     imagem = models.URLField(max_length=255, blank=True)
+    plantado_por = models.CharField(max_length=100, default="DCTA")
 
     @property
     def stored_co2(self) -> float:
@@ -33,6 +37,13 @@ class Tree(models.Model):
             ),
             4,
         )
+
+    @property
+    def stormwater_intercepted(self) -> float:
+        if self.dap <= 0:
+            return 0
+
+        return math.pi * ((self.dap * DIAMETER_RATIO) / (2 * 100)) ** 2 * PRECIPITATION
 
 
 class Post(models.Model):

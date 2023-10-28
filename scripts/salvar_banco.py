@@ -19,9 +19,10 @@ with open('../trees_all.csv', encoding='utf-8') as csv_file:
             longitude = float(row[7].replace(',', '.'))
             laudos = row[8]
             imagens = row[9]
+            plantado_por = "Prefeitura"
             if ID not in trees_in_db:
-                trees.append(Tree(id=ID, nome_popular=nome_popular, nome_cientifico=nome_cientifico, dap=dap, altura=altura, latitude=latitude,
-                                  longitude=longitude, laudo=laudos, imagem=imagens))
+                trees.append(Tree(id=ID, N_placa=ID, nome_popular=nome_popular, nome_cientifico=nome_cientifico, dap=dap, altura=altura, latitude=latitude,
+                                  longitude=longitude, laudo=laudos, imagem=imagens, plantado_por=plantado_por))
         except ValueError:
             print('Unable to convert row', row)
     print('salvando', len(trees), 'arvores')

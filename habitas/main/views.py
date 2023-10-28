@@ -17,8 +17,19 @@ def index(request):
             "Espécies": trees.aggregate(
                 n_species=Count("nome_cientifico", distinct=True)
             )["n_species"],
-            "Ton. de CO<sub>2</sub> retido": round(sum(t.stored_co2 for t in trees), 1),
             "Comentários": posts.count(),
+        },
+        "eco_stats": {
+            "Toneladas de CO<sub>2</sub> retido": {
+                'value': '{:,.2f}'.format(sum(t.stored_co2 for t in trees)),
+                'value_text': 'ton.',
+                'money': "{:.2f}".format(0).replace(".", ",")
+            },
+            "Água de chuva interceptada por ano": {
+                'value': '{:,.0f}'.format(sum(t.stormwater_intercepted for t in trees)),
+                'value_text': 'L',
+                'money': "{:.2f}".format(0).replace(".", ",")
+            },
         },
     }
 
