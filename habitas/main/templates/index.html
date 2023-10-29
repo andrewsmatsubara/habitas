@@ -140,9 +140,14 @@ function create_google_maps_url(lat, long){
   function onMapClick(index) {
     tree = tree_map.get(index)
     Unicorn.call("posts", "update", tree.id);
-
-
-
+    let img_links = ''
+      for (let i = 1; i < tree.imagens.length; i++) {
+           img_links = img_links + `<img src="https://arvores.sjc.sp.gov.br${tree.imagens[i]}">`
+      }
+    let laudos = ''
+      for (let i = 1; i < tree.laudos.length; i++) {
+           laudos = laudos + `<a href="https://arvores.sjc.sp.gov.br${tree.laudos[i]}" class="underline text-blue-500">laudo ${i}</a>`
+      }
     google_maps_url = create_google_maps_url(tree.latitude, tree.longitude)
 
     document.getElementById("estatisticas").style.visibility = "visible";
@@ -154,7 +159,9 @@ function create_google_maps_url(lat, long){
       <p>Google maps: <a href="${google_maps_url}" class="underline text-blue-500">link</a></p>
       <p>CO<sub>2</sub> retido: ${ Math.round(1000 * tree.co2) } kg</p>
       <p>Água de chuva interceptada: ${ Math.round(tree.stormwater) } L</p>
-      <p> Plantado por: ${tree.plantado_por } </p>
+      <p>Plantado por: ${tree.plantado_por } </p>
+      <p>Laudos: ${laudos} </p>
+      <p>Imagens: ${img_links}</p>
     `
 
     document.getElementById("nome_popular").innerHTML = `${tree.nome_popular}`;
@@ -183,7 +190,13 @@ function create_google_maps_url(lat, long){
         co2: {{ tree.stored_co2 }},
         stormwater: {{ tree.stormwater_intercepted }},
         color: "green",
-        plantado_por: "{{ tree.plantado_por }}"
+        plantado_por: "{{ tree.plantado_por }}",
+        imagens: "{{ tree.imagem }}".split(',').map(function(path) {
+                                      return path.trim();
+                                    }),
+        laudos: "{{ tree.laudo }}".split(',').map(function(path) {
+                                      return path.trim();
+                                    }),
     };
     
     if (tree_obj.n_comentarios > 0)
