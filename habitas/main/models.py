@@ -51,6 +51,7 @@ class Post(models.Model):
     author = models.CharField(max_length=255)
     content = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
+    specialized = models.BooleanField(default=False)
 
     class Meta:
         ordering = ("-created_on",)

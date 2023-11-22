@@ -1,10 +1,20 @@
 <div>
   <div>
-    <div class="flex flex-col place-items-center">
+    <div class="flex flex-col">
       <h3 class="text-xl font-medium text-center">Publique um comentário sobre esta árvore!</h3>
-      <textarea unicorn:model.lazy="author" placeholder="Autor" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 h-15 my-2"></textarea>
-      <textarea unicorn:model.lazy="content" placeholder="Comentário" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 h-20 my-2"></textarea>
-      <button unicorn:click="submit" class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-full">Enviar</button>        
+      <textarea unicorn:model="author" placeholder="Autor" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 h-15 my-2"></textarea>
+      <div class="custom-control custom-checkbox checkbox-info">
+        <input type="checkbox" unicorn:model="specialized">
+        <label>Sou usuário especializado</label>
+      </div>
+      {% if specialized %}
+        <input unicorn:model="password" placeholder="Senha" type="password" class="block p-2.5 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300"/>
+      {% endif %}
+      <textarea unicorn:model="content" placeholder="Comentário" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 h-20 my-2"></textarea>
+      <button unicorn:click="submit" class="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-full">Enviar</button>
+      {% if error %}
+        <span style="color: red; font-size: small;">{{ error }}</span>
+      {% endif %}
     </div>
   </div>
   <div class="my-8">
@@ -12,12 +22,16 @@
 
       {% for post in posts %}
       <div class="flex justify-between w-full ">
-        <h2 class="font-bold text-left">{{ post.author }}</h2>
-        <span>{{ post.created_on|date:"d M. Y, H:m"}}</span>
+        <div class="flex items-center gap-2">
+          <h2 class="font-bold text-left">{{ post.author }}</h2>
+          {% if post.specialized %}
+            <span style="font-size: x-small; color: green;">&#10003; especialista</span>
+          {% endif %}
+        </div>
+        <span>{{ post.created_on|date:"d M. Y, H:i"}}</span>
       </div>
 
       <p class="shadow p-2 bg-gray-200 rounded text-gray-900 mb-2">{{ post.content }}</p>
-
 
       {% empty %}
       <h2 class="font-bold text-center">Nenhum comentário</h2>
