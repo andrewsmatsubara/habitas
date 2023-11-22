@@ -1,6 +1,6 @@
 {% extends '_base.html' %} {% load unicorn %}{% load static %} {% block header %}
 
-<link rel="stylesheet" href="{% static 'index.css' %}" />
+<link rel="stylesheet" href="{% static 'css/index.css' %}" />
 
 <link
   rel="stylesheet"
@@ -54,22 +54,27 @@ crossorigin=""></script>
     </div>
 
 
-    <div id="estatisticas" style="visibility:hidden;">
-
-    <h1 class="text-2xl text-left font-medium my-4 w-fit">
-      Informações sobre a árvore
-      <hr class="bg-emerald-900 h-1.5 w-full" />
-    </h1>
-    <h1 class="text-2xl text-left font-medium my-4 w-fit" id="nome_popular">
-      <hr class="bg-emerald-900 h-1.5 w-full"/>
-    </h1>
-    <p class="text-left " id="dados">
-    </p>
+    <div id="estatisticas" style="display:none;">
+      <h1 class="text-2xl text-left font-medium my-4 w-fit">
+        Informações sobre a árvore
+        <hr class="bg-emerald-900 h-1.5 w-full" />
+      </h1>
+      <h1 class="text-2xl text-left font-medium my-4 w-fit" id="nome_popular">
+        <hr class="bg-emerald-900 h-1.5 w-full"/>
+      </h1>
+      <p class="text-left " id="dados">
+      </p>
       <h2 class="text-2xl text-left font-medium my-4 w-fit">
         Comentários
         <hr class="bg-emerald-900 h-1.5 w-full" />
       </h2>
       {% unicorn 'posts' %}
+    </div>
+
+    <div class="info-container">
+      <div class="info-header">Fontes</div>
+      <div>CO<sub>2</sub> retido: Schumacher e Hall (1933)</div>
+      <div>Chuva interceptada: Gash (1979)</div>
     </div>
   </div>
   <div class="z-0 col-span-3 pr-2 h-screen">
@@ -226,17 +231,17 @@ crossorigin=""></script>
   function onMapClick(index) {
     tree = tree_map.get(index);
     Unicorn.call("posts", "update", tree.id);
-    let img_links = '';
+    let img_links = [];
     for (let i = 0; i < tree.imagens.length; i++) {
-      img_links += `<img src="https://arvores.sjc.sp.gov.br${tree.imagens[i]}">`
+      img_links.push(`<img src="https://arvores.sjc.sp.gov.br${tree.imagens[i]}">`);
     }
-    let laudos = '';
+    let laudos = [];
     for (let i = 0; i < tree.laudos.length; i++) {
-      laudos += `<a href="https://arvores.sjc.sp.gov.br${tree.laudos[i]}" class="underline text-blue-500">laudo ${i}</a>`
+      laudos.push(`<a href="https://arvores.sjc.sp.gov.br${tree.laudos[i]}" class="underline text-blue-500">Laudo ${i + 1}</a>`);
     }
     google_maps_url = create_google_maps_url(tree.latitude, tree.longitude);
 
-    document.getElementById("estatisticas").style.visibility = "visible";
+    document.getElementById("estatisticas").style.display = "block";
     document.getElementById("dados").innerHTML = `
       <p>Id. da árvore: ${tree.numero}</p>
       <p>Nome científico: ${tree.nome_cientifico}</p>
@@ -246,8 +251,8 @@ crossorigin=""></script>
       <p>CO<sub>2</sub> retido: ${ Math.round(1000 * tree.co2) } kg</p>
       <p>Água de chuva interceptada: ${ Math.round(tree.stormwater) } L</p>
       <p>Plantado por: ${tree.plantado_por } </p>
-      <p>Laudos: ${laudos} </p>
-      <p>Imagens: ${img_links}</p>
+      ${laudos.length > 0 ? `<p>Laudos: ${laudos.join(', ')} </p>` : ""}
+      ${img_links.length > 0 ? `<p style="font-weight: bold;">Imagens</p> ${img_links.join('')}` : ""}
     `
 
     document.getElementById("nome_popular").innerHTML = `${tree.nome_popular}`;
