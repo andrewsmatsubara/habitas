@@ -43,24 +43,7 @@ crossorigin=""></script>
     </h1>
 
       <div class="grid grid-cols-3" id="estatisticas-gerais">
-{#      {% for stat_name, stat in stats.items %}#}
-{#        <div class="my-2">#}
-{#          <span class="font-bold text-xl">{{stat}}</span>#}
-{#          <br>#}
-{#          <span class="text-lg">{{stat_name | safe}}</span> #}
-{#        </div>#}
-{#      {% endfor %}#}
     </div>
-
-{#    <div class="grid grid-cols-3">#}
-{#      {% for stat_name, stat in stats.items %}#}
-{#        <div class="my-2">#}
-{#          <span class="font-bold text-xl">{{stat}}</span>#}
-{#          <br>#}
-{#          <span class="text-lg">{{stat_name | safe}}</span> #}
-{#        </div>#}
-{#      {% endfor %}#}
-{#    </div>#}
 
     <h1 class="text-2xl text-left font-medium my-4 w-fit">
       Benefícios ecológicos
@@ -129,14 +112,9 @@ crossorigin=""></script>
 </div>
 
 <script>
-
-function create_google_maps_url(lat, long){
-  return `http://maps.google.com/maps?z=12&t=m&q=loc:${lat}+${long}`
-}
-
-</script>
-
-<script>
+  function create_google_maps_url(lat, long){
+    return `http://maps.google.com/maps?z=12&t=m&q=loc:${lat}+${long}`
+  }
   // load trees from context to list
 
   var map = L.map("map").setView([-23.205459913570404, -45.88184219354045], 15);
@@ -147,121 +125,122 @@ function create_google_maps_url(lat, long){
       '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map);
 
-function filterPointsInPolygon(polygon, circles) {
-    // Check if both polygon and points are defined
+  function filterPointsInPolygon(polygon, circles) {
+      // Check if both polygon and points are defined
 
-    try {
-        // Check if Turf.js is available and has the necessary functions
-        if (typeof turf !== 'undefined' && turf.booleanPointInPolygon) {
-            // Log the inputs for debugging
+      try {
+          // Check if Turf.js is available and has the necessary functions
+          if (typeof turf !== 'undefined' && turf.booleanPointInPolygon) {
+              // Log the inputs for debugging
 
-            // Filter points within the clicked neighborhood
-            return circles.filter(circle => {
-                // Log the point for debugging
-                //console.log("Point:", point);
+              // Filter points within the clicked neighborhood
+              return circles.filter(circle => {
+                  // Log the point for debugging
+                  //console.log("Point:", point);
 
-                point = circle.toGeoJSON()
+                  point = circle.toGeoJSON()
 
-                try {
-                    // Check if the point has valid geometry and properties
-                    const coordinates = point.geometry && point.geometry.coordinates;
-                    //console.log("ok", coordinates, polygon.geometry.coordinates)
+                  try {
+                      // Check if the point has valid geometry and properties
+                      const coordinates = point.geometry && point.geometry.coordinates;
+                      //console.log("ok", coordinates, polygon.geometry.coordinates)
 
-                    if (coordinates && Array.isArray(coordinates) && coordinates.length === 2) {
+                      if (coordinates && Array.isArray(coordinates) && coordinates.length === 2) {
 
-                        // Check if the coordinates are valid before invoking Turf.js
-                        return turf.booleanPointInPolygon(turf.point(coordinates), turf.polygon(polygon.geometry.coordinates));
-                    } else {
-                        console.error("Invalid point:", point);
-                        return false;
-                    }
-                } catch (error) {
-                    console.error("Error in filtering points:", error);
-                    return false;
-                }
-            });
-        } else {
-            console.error("Turf.js or its functions are not available.");
-            return [];
-        }
-    } catch (error) {
-        console.error("Error in filtering points:", error);
-        return [];
-    }
-}
+                          // Check if the coordinates are valid before invoking Turf.js
+                          return turf.booleanPointInPolygon(turf.point(coordinates), turf.polygon(polygon.geometry.coordinates));
+                      } else {
+                          console.error("Invalid point:", point);
+                          return false;
+                      }
+                  } catch (error) {
+                      console.error("Error in filtering points:", error);
+                      return false;
+                  }
+              });
+          } else {
+              console.error("Turf.js or its functions are not available.");
+              return [];
+          }
+      } catch (error) {
+          console.error("Error in filtering points:", error);
+          return [];
+      }
+  }
 
   L.geoJSON(CITY_LIMIT).addTo(map);
-// Assume BAIRROS is a GeoJSON layer representing neighborhoods
-const neighborhoodsLayer = L.geoJSON(BAIRROS).addTo(map);
+  // Assume BAIRROS is a GeoJSON layer representing neighborhoods
+  const neighborhoodsLayer = L.geoJSON(
+    BAIRROS,
+    {
+      onEachFeature: (feature, layer) => layer.bindTooltip(feature.properties.bairro, {permanent: true, direction: 'center', opacity: 0.5})
+    }
+  ).addTo(map);
 
-let filteredPointsLayer = null;
+  let filteredPointsLayer = null;
 
-// Define a function to handle the click event on neighborhoods
-function highlightNeighborhood(e) {
-    const clickedLayer = e.target;
+  // Define a function to handle the click event on neighborhoods
+  function highlightNeighborhood(e) {
+      const clickedLayer = e.target;
 
-    // Reset the style of all neighborhood polygons
-    neighborhoodsLayer.setStyle({
-        weight: 3,
-        color: '#3388ff',
-        dashArray: '',
-        fillOpacity: 0.2
-    });
+      // Reset the style of all neighborhood polygons
+      neighborhoodsLayer.setStyle({
+          weight: 3,
+          color: '#3388ff',
+          dashArray: '',
+          fillOpacity: 0.2
+      });
 
-    // Highlight the clicked neighborhood
-    clickedLayer.setStyle({
-        weight: 5,
-        color: '#666',
-        dashArray: '',
-        fillOpacity: 0.4
-    });
+      // Highlight the clicked neighborhood
+      clickedLayer.setStyle({
+          weight: 5,
+          color: '#666',
+          dashArray: '',
+          fillOpacity: 0.4
+      });
 
-    circleLayerGroup.clearLayers();
+      circleLayerGroup.clearLayers();
 
-    // Filter points within the clicked neighborhood
-    const clickedNeighborhood = clickedLayer.toGeoJSON();
-    const filteredCircles = filterPointsInPolygon(clickedNeighborhood, originalCircles);
+      // Filter points within the clicked neighborhood
+      const clickedNeighborhood = clickedLayer.toGeoJSON();
+      const filteredCircles = filterPointsInPolygon(clickedNeighborhood, originalCircles);
 
-    // Create new circle markers for the filtered points and add them to the layer group
-    filteredCircles.forEach(circle => {
-        circleLayerGroup.addLayer(circle)
-    });
+      // Create new circle markers for the filtered points and add them to the layer group
+      filteredCircles.forEach(circle => {
+          circleLayerGroup.addLayer(circle)
+      });
 
-      const tmp = filteredCircles.map(a => a.tree_species)
-  console.log(tmp)
+    const tmp = filteredCircles.map(a => a.tree_species)
+    const tmp2 = filteredCircles.map(a => a.n_posts)
+    const species = new Set(tmp).size;
+    const total_n_posts = tmp2.reduce((a,b)=>a+b, 0)
 
-  const tmp2 = filteredCircles.map(a => a.n_posts)
-  console.log(tmp2)
+        document.getElementById("estatisticas-gerais").innerHTML = `
+          <div class="my-2">
+            <span class="font-bold text-xl">${filteredCircles.length}</span>
+            <br>
+            <span class="text-lg">Árvores Cadastradas</span>
+          </div>
+          <div class="my-2">
+            <span class="font-bold text-xl">${species}</span>
+            <br>
+            <span class="text-lg">Espécies</span>
+          </div>
+          <div class="my-2">
+            <span class="font-bold text-xl">${total_n_posts}</span>
+            <br>
+            <span class="text-lg">Comentários</span>
+          </div>
+          `
 
-  const species = new Set(tmp).size;
-  const total_n_posts = tmp2.reduce((a,b)=>a+b, 0)
+      // You can also do something with the neighborhood's properties or perform other actions here
 
-      document.getElementById("estatisticas-gerais").innerHTML = `
-        <div class="my-2">
-          <span class="font-bold text-xl">${filteredCircles.length}</span>
-          <br>
-          <span class="text-lg">Árvores Cadastradas</span>
-        </div>
-        <div class="my-2">
-          <span class="font-bold text-xl">${species}</span>
-          <br>
-          <span class="text-lg">Espécies</span>
-        </div>
-        <div class="my-2">
-          <span class="font-bold text-xl">${total_n_posts}</span>
-          <br>
-          <span class="text-lg">Comentários</span>
-        </div>
-        `
+  }
 
-    // You can also do something with the neighborhood's properties or perform other actions here
-
-}
-
-// Add the click event listener to each neighborhood polygon
-neighborhoodsLayer.eachLayer(layer => {
-    layer.on('click', highlightNeighborhood);
-});
+  // Add the click event listener to each neighborhood polygon
+  neighborhoodsLayer.eachLayer(layer => {
+      layer.on('click', highlightNeighborhood);
+  });
 
   function onMapClick(index) {
     tree = tree_map.get(index)
@@ -375,10 +354,7 @@ neighborhoodsLayer.eachLayer(layer => {
   circleLayerGroup.addTo(map);
 
   const tmp = originalCircles.map(a => a.tree_species)
-  console.log(tmp)
-
   const tmp2 = originalCircles.map(a => a.n_posts)
-  console.log(tmp2)
 
   const species = new Set(tmp).size;
   const total_n_posts = tmp2.reduce((a,b)=>a+b, 0)
