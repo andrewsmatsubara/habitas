@@ -12,6 +12,7 @@ def index(request):
     posts = Post.objects.all()
     context = {
         "trees": trees,
+        "posts": posts,
         "stats": {
             "Árvores cadastradas": trees.count(),
             "Espécies": trees.aggregate(
