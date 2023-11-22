@@ -35,14 +35,14 @@ crossorigin=""></script>
     </p>
     <p class="text-left font-light">
       Pela primeira vez, você tem acesso a informações sobre as árvores 
-      do Campus do CTA. Aprenda sobre as árvores que compõem a floresta urbana da nossa cidade.
+      de São José dos Campos. Aprenda sobre as árvores que compõem a floresta urbana da nossa cidade.
     </p>
     <h1 class="text-2xl text-left font-medium my-4 w-fit">
       Estatísticas gerais
       <hr class="bg-emerald-900 h-1.5 w-full" />
     </h1>
 
-      <div class="grid grid-cols-3" id="estatisticas-gerais">
+    <div class="grid grid-cols-3" id="estatisticas-gerais">
     </div>
 
     <h1 class="text-2xl text-left font-medium my-4 w-fit">
@@ -50,15 +50,8 @@ crossorigin=""></script>
       <hr class="bg-emerald-900 h-1.5 w-full" />
     </h1>
 
-    {% for stat_name, stat in eco_stats.items %}
-      <div class="my-2">
-        <div class="font-bold text-xl">{{stat_name | safe}}</div>
-        <div style="display: grid; grid-auto-flow: column;">
-          <span class="text-lg">{{stat.value}} <span style="color: rgb(5 150 105)">{{stat.value_text}}</span></span>
-            <span class="text-lg"><span style="color: rgb(5 150 105)">Valor: </span>{{stat.money}} R$</span>
-        </div>
-      </div>
-    {% endfor %}
+    <div id="estatisticas-ecologicas">
+    </div>
 
 
     <div id="estatisticas" style="visibility:hidden;">
@@ -112,6 +105,48 @@ crossorigin=""></script>
 </div>
 
 <script>
+  function renderStatistics(circles) {
+    const species = new Set(circles.map(a => a.tree_species)).size;
+    const total_n_posts = circles.map(a => a.n_posts).reduce((a,b)=>a+b, 0);
+    const stored_co2 = circles.map(a => a.stored_co2).reduce((a,b)=>a+b, 0);
+    const stormwater = circles.map(a => a.stormwater_intercepted).reduce((a,b)=>a+b, 0);
+
+    document.getElementById("estatisticas-gerais").innerHTML = `
+      <div class="my-2">
+        <span class="font-bold text-xl">${circles.length}</span>
+        <br>
+        <span class="text-lg">Árvores Cadastradas</span>
+      </div>
+      <div class="my-2">
+        <span class="font-bold text-xl">${species}</span>
+        <br>
+        <span class="text-lg">Espécies</span>
+      </div>
+      <div class="my-2">
+        <span class="font-bold text-xl">${total_n_posts}</span>
+        <br>
+        <span class="text-lg">Comentários</span>
+      </div>
+    `;
+
+    document.getElementById("estatisticas-ecologicas").innerHTML = `
+      <div class="my-2">
+        <div class="font-bold text-xl">Toneladas de CO<sub>2</sub> retido</div>
+        <div style="display: grid; grid-auto-flow: column;">
+          <span class="text-lg">${stored_co2.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} <span style="color: rgb(5 150 105)">ton.</span></span>
+            <span class="text-lg"><span style="color: rgb(5 150 105)">Valor: </span>0,00 R$</span>
+        </div>
+      </div>
+      <div class="my-2">
+        <div class="font-bold text-xl">Água de chuva interceptada por ano</div>
+        <div style="display: grid; grid-auto-flow: column;">
+          <span class="text-lg">${stormwater.toLocaleString(undefined, {maximumFractionDigits: 0})} <span style="color: rgb(5 150 105)">L</span></span>
+            <span class="text-lg"><span style="color: rgb(5 150 105)">Valor: </span>0,00 R$</span>
+        </div>
+      </div>
+    `;
+  }
+
   function create_google_maps_url(lat, long){
     return `http://maps.google.com/maps?z=12&t=m&q=loc:${lat}+${long}`
   }
@@ -177,83 +212,50 @@ crossorigin=""></script>
     }
   ).addTo(map);
 
-  let filteredPointsLayer = null;
-
   // Define a function to handle the click event on neighborhoods
   function highlightNeighborhood(e) {
-      const clickedLayer = e.target;
+    const clickedLayer = e.target;
+    neighborhoodsLayer.setStyle({
+        weight: 3,
+        color: '#3388ff',
+        dashArray: '',
+        fillOpacity: 0.2
+    });
+    clickedLayer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.4
+    });
 
-      // Reset the style of all neighborhood polygons
-      neighborhoodsLayer.setStyle({
-          weight: 3,
-          color: '#3388ff',
-          dashArray: '',
-          fillOpacity: 0.2
-      });
+    circleLayerGroup.clearLayers();
 
-      // Highlight the clicked neighborhood
-      clickedLayer.setStyle({
-          weight: 5,
-          color: '#666',
-          dashArray: '',
-          fillOpacity: 0.4
-      });
+    const clickedNeighborhood = clickedLayer.toGeoJSON();
+    const filteredCircles = filterPointsInPolygon(clickedNeighborhood, originalCircles);
 
-      circleLayerGroup.clearLayers();
+    filteredCircles.forEach(circle => {
+        circleLayerGroup.addLayer(circle)
+    });
 
-      // Filter points within the clicked neighborhood
-      const clickedNeighborhood = clickedLayer.toGeoJSON();
-      const filteredCircles = filterPointsInPolygon(clickedNeighborhood, originalCircles);
-
-      // Create new circle markers for the filtered points and add them to the layer group
-      filteredCircles.forEach(circle => {
-          circleLayerGroup.addLayer(circle)
-      });
-
-    const tmp = filteredCircles.map(a => a.tree_species)
-    const tmp2 = filteredCircles.map(a => a.n_posts)
-    const species = new Set(tmp).size;
-    const total_n_posts = tmp2.reduce((a,b)=>a+b, 0)
-
-        document.getElementById("estatisticas-gerais").innerHTML = `
-          <div class="my-2">
-            <span class="font-bold text-xl">${filteredCircles.length}</span>
-            <br>
-            <span class="text-lg">Árvores Cadastradas</span>
-          </div>
-          <div class="my-2">
-            <span class="font-bold text-xl">${species}</span>
-            <br>
-            <span class="text-lg">Espécies</span>
-          </div>
-          <div class="my-2">
-            <span class="font-bold text-xl">${total_n_posts}</span>
-            <br>
-            <span class="text-lg">Comentários</span>
-          </div>
-          `
-
-      // You can also do something with the neighborhood's properties or perform other actions here
-
+    renderStatistics(filteredCircles);
   }
 
-  // Add the click event listener to each neighborhood polygon
   neighborhoodsLayer.eachLayer(layer => {
       layer.on('click', highlightNeighborhood);
   });
 
   function onMapClick(index) {
-    tree = tree_map.get(index)
+    tree = tree_map.get(index);
     Unicorn.call("posts", "update", tree.id);
-    let img_links = ''
-      for (let i = 1; i < tree.imagens.length; i++) {
-           img_links = img_links + `<img src="https://arvores.sjc.sp.gov.br${tree.imagens[i]}">`
-      }
-    let laudos = ''
-      for (let i = 1; i < tree.laudos.length; i++) {
-           laudos = laudos + `<a href="https://arvores.sjc.sp.gov.br${tree.laudos[i]}" class="underline text-blue-500">laudo ${i}</a>`
-      }
-    google_maps_url = create_google_maps_url(tree.latitude, tree.longitude)
+    let img_links = '';
+    for (let i = 0; i < tree.imagens.length; i++) {
+      img_links += `<img src="https://arvores.sjc.sp.gov.br${tree.imagens[i]}">`
+    }
+    let laudos = '';
+    for (let i = 0; i < tree.laudos.length; i++) {
+      laudos += `<a href="https://arvores.sjc.sp.gov.br${tree.laudos[i]}" class="underline text-blue-500">laudo ${i}</a>`
+    }
+    google_maps_url = create_google_maps_url(tree.latitude, tree.longitude);
 
     document.getElementById("estatisticas").style.visibility = "visible";
     document.getElementById("dados").innerHTML = `
@@ -270,49 +272,36 @@ crossorigin=""></script>
     `
 
     document.getElementById("nome_popular").innerHTML = `${tree.nome_popular}`;
-
-    // use tree_dict.id to load posts using django_unicorn
-
-
-
-
   }
 
   tree_map = new Map();
 
   {% for tree in trees %}
     tree_obj = {
-        id: {{ tree.id }},
-        nome_popular: "{{ tree.nome_popular }}",
-        nome_cientifico: "{{ tree.nome_cientifico }}",
-        dap: "{{ tree.dap }}",
-        altura: "{{ tree.altura }}",
-        data_da_coleta: "{{ tree.data_da_coleta }}",
-        latitude: "{{ tree.latitude }}",
-        longitude: "{{ tree.longitude }}",
-        numero: {{ tree.N_placa }},
-        n_comentarios: {{ tree.n_posts }},
-        co2: {{ tree.stored_co2 }},
-        stormwater: {{ tree.stormwater_intercepted }},
-        color: "green",
-        plantado_por: "{{ tree.plantado_por }}",
-        imagens: "{{ tree.imagem }}".split(',').map(function(path) {
-                                      return path.trim();
-                                    }),
-        laudos: "{{ tree.laudo }}".split(',').map(function(path) {
-                                      return path.trim();
-                                    }),
+      id: {{ tree.id }},
+      nome_popular: "{{ tree.nome_popular }}".trim(),
+      nome_cientifico: "{{ tree.nome_cientifico }}".trim(),
+      dap: "{{ tree.dap }}",
+      altura: "{{ tree.altura }}",
+      data_da_coleta: "{{ tree.data_da_coleta }}",
+      latitude: "{{ tree.latitude }}",
+      longitude: "{{ tree.longitude }}",
+      numero: {{ tree.N_placa }},
+      n_comentarios: {{ tree.n_posts }},
+      co2: {{ tree.stored_co2 }},
+      stormwater: {{ tree.stormwater_intercepted }},
+      color: {{ tree.n_posts }} > 0 ? "yellow" : "green",
+      plantado_por: "{{ tree.plantado_por }}",
+      imagens: "{{ tree.imagem }}".split(',').map(path => path.trim()).filter(val => val !== ""),
+      laudos: "{{ tree.laudo }}".split(',').map(path => path.trim()).filter(val => val !== ""),
     };
-
-    if (tree_obj.n_comentarios > 0)
-      tree_obj.color = "yellow";
 
     tree_map.set(tree_obj.id, tree_obj)
   {% endfor %}
 
 
   // circle_map = new Map();
-  lastClickedCircle = undefined;
+  let lastClickedCircle;
 
   const circleLayerGroup = L.layerGroup();
 
@@ -320,18 +309,20 @@ crossorigin=""></script>
 
   for (let [tree_id, tree] of tree_map) {
     circle = L.circle(
-        [tree.latitude, tree.longitude],
-        {
-          color: tree.color,
-          fillColor: tree.color,
-          fillOpacity: 0.5,
-          radius: 5,
-          selected: false,
-        }
+      [tree.latitude, tree.longitude],
+      {
+        color: tree.color,
+        fillColor: tree.color,
+        fillOpacity: 0.5,
+        radius: 5,
+        selected: false,
+      }
     )
     circle.tree_id = tree_id;
-    circle.tree_species=tree.nome_cientifico
-    circle.n_posts = tree.n_comentarios
+    circle.tree_species = tree.nome_cientifico;
+    circle.n_posts = tree.n_comentarios;
+    circle.stored_co2 = tree.co2;
+    circle.stormwater_intercepted = tree.stormwater;
 
     circle.on("click", function(){
       if (lastClickedCircle){
@@ -347,53 +338,12 @@ crossorigin=""></script>
     })
 
     originalCircles.push(circle)
-
   }
 
   originalCircles.forEach(circle => circleLayerGroup.addLayer(circle));
   circleLayerGroup.addTo(map);
 
-  const tmp = originalCircles.map(a => a.tree_species)
-  const tmp2 = originalCircles.map(a => a.n_posts)
-
-  const species = new Set(tmp).size;
-  const total_n_posts = tmp2.reduce((a,b)=>a+b, 0)
-
-      document.getElementById("estatisticas-gerais").innerHTML = `
-        <div class="my-2">
-          <span class="font-bold text-xl">${originalCircles.length}</span>
-          <br>
-          <span class="text-lg">Árvores Cadastradas</span>
-        </div>
-        <div class="my-2">
-          <span class="font-bold text-xl">${species}</span>
-          <br>
-          <span class="text-lg">Espécies</span>
-        </div>
-        <div class="my-2">
-          <span class="font-bold text-xl">${total_n_posts}</span>
-          <br>
-          <span class="text-lg">Comentários</span>
-        </div>
-        `
-
-
-  // circlearray.forEach(function (circle, index) {
-  //     tree_dict = tree_array[index]
-  //     popup = `<span class="font-bold text-ellipsis">Nome popular:</span> ${tree_dict.nome_popular}<br>` +
-  //         `<span class="font-bold text-ellipsis">Nome científico:</span> ${tree_dict.nome_cientifico}<br>` +
-  //         `<span class="font-bold text-ellipsis">Diâmetro:</span> ${tree_dict.dap}cm<br>`
-  //     "DAP: " + tree_dict.dap + "<br>" + "Altura: " + tree_dict.altura + "<br>" + "Data da coleta: " + tree_dict.data_da_coleta + "<br>" + "Latitude: " + tree_dict.latitude + "<br>" + "Longitude: " + tree_dict.longitude;
-  //     circle.bindPopup(popup)
-  // });
-  // circlearray.forEach(function (circle, index) {
-  //   circle.on("click", function () {
-  //     lastClickedCircle.setStyle({color: 'green', fillColor: '#040'});
-  //     onMapClick(index);
-  //     this.setStyle({color: 'red', fillColor: '#f00'});
-  //     lastClickedCircle = this;
-  //   });
-  // });
+  renderStatistics(originalCircles);
 </script>
 
 {% endblock %}
