@@ -9,6 +9,9 @@ BETA2 = 0.37162
 PRECIPITATION = 1329  # Precipitação anual em São José dos Campos (L / m^2)
 DIAMETER_RATIO = 4  # Razão média entre diâmetro da copa e diâmetro do tronco
 
+RADIATION = 1661 # Radiação solar anual em São José dos Campos (kWh / m^2)
+ENERGY_RATIO = 0.25 # Taxa de aproveitamento da energia das sombras
+
 
 class Tree(models.Model):
     N_placa = models.FloatField(default=0)
@@ -44,6 +47,13 @@ class Tree(models.Model):
             return 0
 
         return math.pi * ((self.dap * DIAMETER_RATIO) / (2 * 100)) ** 2 * PRECIPITATION
+
+    @property
+    def conserved_energy(self) -> float:
+        if self.dap <= 0:
+            return 0
+
+        return math.pi * ((self.dap * DIAMETER_RATIO) / (2 * 100)) ** 2 * RADIATION * ENERGY_RATIO
 
 
 class Post(models.Model):
