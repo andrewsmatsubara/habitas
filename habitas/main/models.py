@@ -25,6 +25,7 @@ class Tree(models.Model):
     laudo = models.URLField(max_length=255, blank=True)
     imagem = models.URLField(max_length=255, blank=True)
     plantado_por = models.CharField(max_length=100, default="DCTA")
+    species = models.ForeignKey('Species', null=True, on_delete=models.SET_NULL)
 
     @property
     def stored_co2(self) -> float:
@@ -55,6 +56,10 @@ class Tree(models.Model):
 
         return math.pi * ((self.dap * DIAMETER_RATIO) / (2 * 100)) ** 2 * RADIATION * ENERGY_RATIO
 
+    @property
+    def biodiversity(self) -> float:
+        return self.species.bio_index if self.species is not None else 1
+
 
 class Post(models.Model):
     tree = models.ForeignKey(Tree, related_name="posts", on_delete=models.CASCADE)
@@ -65,3 +70,8 @@ class Post(models.Model):
 
     class Meta:
         ordering = ("-created_on",)
+
+
+class Species(models.Model):
+    name = models.TextField()
+    bio_index = models.FloatField()
