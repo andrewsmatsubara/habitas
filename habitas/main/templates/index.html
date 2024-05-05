@@ -207,31 +207,29 @@ crossorigin=""></script>
       }
   }
 
-  L.geoJSON(CITY_LIMIT).addTo(map);
+  L.geoJSON(CITY_LIMIT, {fillOpacity: 0.0}).addTo(map);
   // Assume BAIRROS is a GeoJSON layer representing neighborhoods
+
   const neighborhoodsLayer = L.geoJSON(
-    BAIRROS,
-    {
-      onEachFeature: (feature, layer) => layer.bindTooltip(feature.properties.bairro, {permanent: true, direction: 'center', opacity: 0.5})
-    }
+    BAIRROS, {color: 'transparent'}
   ).addTo(map);
 
   // Define a function to handle the click event on neighborhoods
   function highlightNeighborhood(e) {
-    const clickedLayer = e.target;
-    neighborhoodsLayer.setStyle({
-        weight: 3,
-        color: '#3388ff',
-        dashArray: '',
-        fillOpacity: 0.2
-    });
-    clickedLayer.setStyle({
-        weight: 5,
-        color: '#666',
-        dashArray: '',
-        fillOpacity: 0.4
-    });
+    neighborhoodsLayer.getLayers().forEach((layer) => layer.unbindTooltip());
 
+    const clickedLayer = e.target;
+    
+    clickedLayer.bindTooltip(clickedLayer.feature.properties.bairro,  {permanent: true, direction: 'center', opacity: 0.5}).addTo(map);
+    
+    neighborhoodsLayer.resetStyle();
+    clickedLayer.setStyle({
+      weight: 5,
+      color: '#666',
+      dashArray: '',
+      fillOpacity: 0.4
+    });
+    
     circleLayerGroup.clearLayers();
 
     const clickedNeighborhood = clickedLayer.toGeoJSON();
@@ -310,9 +308,7 @@ crossorigin=""></script>
 
   // circle_map = new Map();
   let lastClickedCircle;
-
   const circleLayerGroup = L.layerGroup();
-
   const originalCircles = []
 
   for (let [tree_id, tree] of tree_map) {
