@@ -239,6 +239,8 @@ crossorigin=""></script>
         circleLayerGroup.addLayer(circle)
     });
 
+    circleLayerGroup.addTo(map);
+
     renderStatistics(filteredCircles);
   }
 
@@ -346,8 +348,8 @@ crossorigin=""></script>
     originalCircles.push(circle)
   }
 
-  originalCircles.forEach(circle => circleLayerGroup.addLayer(circle));
-  circleLayerGroup.addTo(map);
+  // originalCircles.forEach(circle => circleLayerGroup.addLayer(circle));
+  // circleLayerGroup.addTo(map);
 
   renderStatistics(originalCircles);
 </script>
