@@ -214,34 +214,44 @@ crossorigin=""></script>
     BAIRROS, {color: 'transparent'}
   ).addTo(map);
 
+  let clickedLayerId = null;
+
   // Define a function to handle the click event on neighborhoods
   function highlightNeighborhood(e) {
-    neighborhoodsLayer.getLayers().forEach((layer) => layer.unbindTooltip());
-
     const clickedLayer = e.target;
-    
-    clickedLayer.bindTooltip(clickedLayer.feature.properties.bairro,  {permanent: true, direction: 'center', opacity: 0.5}).addTo(map);
-    
-    neighborhoodsLayer.resetStyle();
-    clickedLayer.setStyle({
-      weight: 5,
-      color: '#666',
-      dashArray: '',
-      fillOpacity: 0.4
-    });
-    
+
+    neighborhoodsLayer.getLayers().forEach((layer) => layer.unbindTooltip());
     circleLayerGroup.clearLayers();
 
-    const clickedNeighborhood = clickedLayer.toGeoJSON();
-    const filteredCircles = filterPointsInPolygon(clickedNeighborhood, originalCircles);
-
-    filteredCircles.forEach(circle => {
-        circleLayerGroup.addLayer(circle)
-    });
-
-    circleLayerGroup.addTo(map);
-
-    renderStatistics(filteredCircles);
+    if (clickedLayer.feature.id === clickedLayerId) {
+      clickedLayer.setStyle({weight: 0,
+        color: 'transparent',
+        dashArray: '',
+        fillOpacity: 0.0});
+    } else {
+      clickedLayer.bindTooltip(clickedLayer.feature.properties.bairro,  {permanent: true, direction: 'center', opacity: 0.5}).addTo(map);
+      
+      neighborhoodsLayer.resetStyle();
+      clickedLayer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.4
+      });
+        
+      const clickedNeighborhood = clickedLayer.toGeoJSON();
+      const filteredCircles = filterPointsInPolygon(clickedNeighborhood, originalCircles);
+  
+      filteredCircles.forEach(circle => {
+          circleLayerGroup.addLayer(circle)
+      });
+  
+      circleLayerGroup.addTo(map);
+  
+      clickedLayerId = clickedLayer.feature.id;
+  
+      renderStatistics(filteredCircles);
+    }
   }
 
   neighborhoodsLayer.eachLayer(layer => {
